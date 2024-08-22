@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "744760460637",
+    "project_id": "securip-60020",
+    "storage_bucket": "securip-60020.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744760460637:android:c1452b820a20c359bdd4b4",
+        "android_client_info": {
+          "package_name": "com.example.securip"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGvS0IrP5hp4ZIgAYsEhZwjlrpKK7Awyw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744760460637:android:ad40b4a9903e7f82bdd4b4",
+        "android_client_info": {
+          "package_name": "com.securip.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGvS0IrP5hp4ZIgAYsEhZwjlrpKK7Awyw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
