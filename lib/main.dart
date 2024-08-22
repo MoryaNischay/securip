@@ -1,8 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'screens/login.dart'; // Replace with your actual file name
 
+import 'screens/login.dart'; // Replace with your actual file name
+import 'screens/condevs.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -22,30 +23,57 @@ class MyApp extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            // User is logged in, navigate to the home screen
-            return HomeScreen(); // Replace with your home screen widget
+            final user = snapshot.data!; // Get the logged-in user object
+
+            // Navigate to the home screen with user data
+            return HomeScreen(user: user);
           } else {
-            // User is not logged in, show the login screen
-            return const LoginPage();
+            return LoginPage();
           }
         },
       ),
-      routes: {
-        '/home': (context) => HomeScreen(), // Replace with your home screen widget
-      },
     );
   }
 }
 
 class HomeScreen extends StatelessWidget {
+  final User user;
+
+  const HomeScreen({Key? key, required this.user}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              // Implement your logout logic here
+              await FirebaseAuth.instance.signOut();
+              // Navigate back to the login page or any other desired screen
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
+        ],
       ),
-      body: const Center(
-        child: Text('Welcome to your app!'),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Welcome to SECURIPI!, ${user.email}!'),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ConDevsPage()),
+                );
+              },
+              child: const Text('View Device Status'),
+            )
+          ],
+        ),
       ),
     );
   }

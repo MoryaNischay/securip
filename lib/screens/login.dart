@@ -12,6 +12,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isRegisterMode = true; // Set default mode to register
 
   @override
   void dispose() {
@@ -20,39 +21,32 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  Future<void> _signInWithEmailAndPassword() async {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-        // Successful login, navigate to the next screen
-        Navigator.pushReplacementNamed(context, '/home'); // Replace with your home screen route
+        if (_isRegisterMode) {
+          // Register
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          );
+        } else {
+          // Login
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          );
+        }
+        // Successful login/registration, navigate to the next screen
+        Navigator.pushReplacementNamed(
+            context, '/home'); // Replace with your home screen route
       } on FirebaseAuthException catch (e) {
-        // Handle login errors
-        print('Failed to sign in: ${e.code}');
+        // Handle login/registration errors
+        print('Failed to ${_isRegisterMode ? 'register' : 'login'}: ${e.code}');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to sign in: ${e.code}')),
-        );
-      }
-    }
-  }
-
-  Future<void> _registerWithEmailAndPassword() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-        // Successful registration, navigate to the next screen
-        Navigator.pushReplacementNamed(context, '/home'); // Replace with your home screen route
-      } on FirebaseAuthException catch (e) {
-        // Handle registration errors
-        print('Failed to register: ${e.code}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to register: ${e.code}')),
+          SnackBar(
+              content: Text(
+                  'Failed to ${_isRegisterMode ? 'register' : 'login'}: ${e.code}')),
         );
       }
     }
@@ -62,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('Welcome!'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -98,13 +92,18 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _signInWithEmailAndPassword,
-                child: const Text('Login'),
+                onPressed: _submitForm,
+                child: Text(_isRegisterMode ? 'Register' : 'Login'),
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _registerWithEmailAndPassword,
-                child: const Text('Register'),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isRegisterMode = !_isRegisterMode;
+                  });
+                },
+                child: Text(
+                    _isRegisterMode ? 'Login' : 'Register now!'),
               ),
             ],
           ),
