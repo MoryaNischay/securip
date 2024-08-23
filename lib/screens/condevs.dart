@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:securip/device_monitor.dart';
 
 class ConDevsPage extends StatefulWidget {
   const ConDevsPage({super.key});
@@ -10,36 +11,15 @@ class ConDevsPage extends StatefulWidget {
 }
 
 class _ConDevsPageState extends State<ConDevsPage> {
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      DeviceMonitorService().flutterLocalNotificationsPlugin;
+
+  // Access the global streams from DeviceMonitorService
   final Stream<DocumentSnapshot<Map<String, dynamic>>> _airQualityStream =
-      FirebaseFirestore.instance
-          .collection('Image-Stat')
-          .doc('Air-Quality')
-          .snapshots();
+      DeviceMonitorService().airQualityStream;
 
   final Stream<DocumentSnapshot<Map<String, dynamic>>> _imageDetectStream =
-      FirebaseFirestore.instance
-          .collection('Image-Stat')
-          .doc('Image-Detect')
-          .snapshots();
-
-  // Initialize FlutterLocalNotificationsPlugin
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-
-  // Previous status values to track changes
-  bool? _previousAirQualityStatus;
-  bool? _previousImageDetectStatus;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Initialize notification plugin with correct icon
-    const initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
-
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
+      DeviceMonitorService().imageDetectStream;
 
   @override
   Widget build(BuildContext context) {
@@ -66,17 +46,6 @@ class _ConDevsPageState extends State<ConDevsPage> {
                   airQualitySnapshot.data!.data() as Map<String, dynamic>;
               final airQualityName = airQualityData['Name'];
               final bool airQualityStatus = airQualityData['Status'];
-
-              // Check for change in status
-              if (_previousAirQualityStatus != null && 
-                  _previousAirQualityStatus != airQualityStatus &&
-                  !airQualityStatus) {
-                showNotification(
-                    title: 'Air Quality Disconnected',
-                    body: 'The Air Quality device is no longer connected.');
-              }
-
-              _previousAirQualityStatus = airQualityStatus;
 
               return ListTile(
                 title: const Text('Air Quality'),
@@ -109,17 +78,6 @@ class _ConDevsPageState extends State<ConDevsPage> {
               final imageDetectName = imageDetectData['Name'];
               final bool imageDetectStatus = imageDetectData['Status'];
 
-              // Check for change in status
-              if (_previousImageDetectStatus != null && 
-                  _previousImageDetectStatus != imageDetectStatus &&
-                  !imageDetectStatus) {
-                showNotification(
-                    title: 'Image Detect Disconnected',
-                    body: 'The Image Detect device is no longer connected.');
-              }
-
-              _previousImageDetectStatus = imageDetectStatus;
-
               return ListTile(
                 title: const Text('Image Detect'),
                 subtitle: Column(
@@ -135,33 +93,6 @@ class _ConDevsPageState extends State<ConDevsPage> {
           ),
         ],
       ),
-    );
-  }
-
-  // Function to show a notification
-  Future<void> showNotification({
-    required String title,
-    required String body,
-  }) async {
-    // Log a message to indicate a notification is being sent
-    print('Sending notification: $title - $body');
-
-    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'channel_id',
-      'Channel Name',
-      importance: Importance.max,
-      priority: Priority.high,
-      playSound: true,
-      icon: '@mipmap/ic_launcher',  // Ensure the correct icon is referenced
-    );
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
-
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      title,
-      body,
-      platformChannelSpecifics,
     );
   }
 }

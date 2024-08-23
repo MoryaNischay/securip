@@ -2,16 +2,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class DeviceMonitorService {
-  bool? _previousAirQualityStatus;
-  bool? _previousImageDetectStatus;
+  static final DeviceMonitorService _instance = DeviceMonitorService._internal();
 
-  final Stream<DocumentSnapshot<Map<String, dynamic>>> _airQualityStream =
+  factory DeviceMonitorService() {
+    return _instance;
+  }
+
+  DeviceMonitorService._internal() {
+    _initializeNotifications();
+    _monitorAirQuality();
+    _monitorImageDetect();
+  }
+
+  final Stream<DocumentSnapshot<Map<String, dynamic>>> airQualityStream =
       FirebaseFirestore.instance
           .collection('Image-Stat')
           .doc('Air-Quality')
           .snapshots();
 
-  final Stream<DocumentSnapshot<Map<String, dynamic>>> _imageDetectStream =
+  final Stream<DocumentSnapshot<Map<String, dynamic>>> imageDetectStream =
       FirebaseFirestore.instance
           .collection('Image-Stat')
           .doc('Image-Detect')
@@ -20,11 +29,8 @@ class DeviceMonitorService {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  DeviceMonitorService() {
-    _initializeNotifications();
-    _monitorAirQuality();
-    _monitorImageDetect();
-  }
+  bool? _previousAirQualityStatus;
+  bool? _previousImageDetectStatus;
 
   // Initialize the FlutterLocalNotificationsPlugin
   void _initializeNotifications() {
@@ -35,7 +41,7 @@ class DeviceMonitorService {
   }
 
   void _monitorAirQuality() {
-    _airQualityStream.listen((DocumentSnapshot<Map<String, dynamic>> snapshot) {
+    airQualityStream.listen((snapshot) {
       final airQualityData = snapshot.data()!;
       final bool airQualityStatus = airQualityData['Status'];
 
@@ -53,7 +59,7 @@ class DeviceMonitorService {
   }
 
   void _monitorImageDetect() {
-    _imageDetectStream.listen((DocumentSnapshot<Map<String, dynamic>> snapshot) {
+    imageDetectStream.listen((snapshot) {
       final imageDetectData = snapshot.data()!;
       final bool imageDetectStatus = imageDetectData['Status'];
 
