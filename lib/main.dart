@@ -21,9 +21,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Your App Name', // Replace with your app's name
+      title: 'Securip', // Replace with your app's name
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.green,
       ),
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
@@ -50,8 +50,17 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 234, 183, 125),
       appBar: AppBar(
-        title: const Text('Home'),
+        backgroundColor: const Color.fromARGB(176, 227, 11, 94),
+        centerTitle: true,
+        title: const Text(
+          'SecuriPi',
+          style: TextStyle(
+            fontSize:
+                25, // Adjust this value to increase the font size slightly
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -70,6 +79,11 @@ class HomeScreen extends StatelessWidget {
           children: [
             Text('Welcome to SECURIPI!, ${user.email}!'),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(176, 227, 11, 94),
+                foregroundColor: Colors.black,
+                // Set the button color to match the AppBar
+              ),
               onPressed: () {
                 Navigator.push(
                   context,

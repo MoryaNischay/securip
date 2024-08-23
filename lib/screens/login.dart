@@ -55,8 +55,11 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 234, 183, 125),
       appBar: AppBar(
-        title: const Text('Welcome!'),
+        backgroundColor: const Color.fromARGB(176, 227, 11, 94),
+        centerTitle: true,
+        title: const Text('Welcome!', style: TextStyle(fontSize: 24)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -92,18 +95,32 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(176, 227, 11, 94),
+                  foregroundColor: Colors.black,
+                ),
                 onPressed: _submitForm,
-                child: Text(_isRegisterMode ? 'Register' : 'Login'),
+                child: Text(_isRegisterMode ? 'Register' : 'Login',
+                    style: const TextStyle(fontSize: 15)),
               ),
               const SizedBox(height: 16),
+              //align the text to the center
+              const Align(
+                alignment: Alignment.center,
+                child: Text('Already have an account?'),
+              ),
               TextButton(
                 onPressed: () {
                   setState(() {
                     _isRegisterMode = !_isRegisterMode;
                   });
                 },
-                child: Text(
-                    _isRegisterMode ? 'Login' : 'Register now!'),
+                child: Text(_isRegisterMode ? 'Login' : 'Register now!',
+                    //underline the text
+                    style: const TextStyle(
+                        fontSize: 15,
+                        color: Colors.black,
+                        decoration: TextDecoration.underline)),
               ),
             ],
           ),

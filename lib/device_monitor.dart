@@ -2,16 +2,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class DeviceMonitorService {
-  static final DeviceMonitorService _instance = DeviceMonitorService._internal();
+  static final DeviceMonitorService _instance =
+      DeviceMonitorService._internal();
 
   factory DeviceMonitorService() {
     return _instance;
   }
 
   DeviceMonitorService._internal() {
-    _initializeNotifications();
-    _monitorAirQuality();
-    _monitorImageDetect();
+    _fetchData().then((_) {
+      _initializeNotifications();
+      _monitorAirQuality();
+      _monitorImageDetect();
+    });
   }
 
   final Stream<DocumentSnapshot<Map<String, dynamic>>> airQualityStream =
@@ -29,15 +32,28 @@ class DeviceMonitorService {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  bool? _previousAirQualityStatus;
-  bool? _previousImageDetectStatus;
+  bool _previousAirQualityStatus = false; // Initialize with a default value
+  bool _previousImageDetectStatus = false; // Initialize with a default value
 
   // Initialize the FlutterLocalNotificationsPlugin
   void _initializeNotifications() {
-    const initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+    const initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
 
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  // Force data retrieval on initialization
+  Future<void> _fetchData() {
+    return airQualityStream.first.then((snapshot) {
+      // Process the first snapshot of airQualityStream
+    }).then((_) {
+      return imageDetectStream.first;
+    }).then((snapshot) {
+      // Process the first snapshot of imageDetectStream
+    });
   }
 
   void _monitorAirQuality() {
@@ -45,9 +61,7 @@ class DeviceMonitorService {
       final airQualityData = snapshot.data()!;
       final bool airQualityStatus = airQualityData['Status'];
 
-      if (_previousAirQualityStatus != null &&
-          _previousAirQualityStatus != airQualityStatus &&
-          !airQualityStatus) {
+      if (_previousAirQualityStatus != airQualityStatus && !airQualityStatus) {
         _showNotification(
           title: 'Air Quality Disconnected',
           body: 'The Air Quality device is no longer connected.',
@@ -63,8 +77,7 @@ class DeviceMonitorService {
       final imageDetectData = snapshot.data()!;
       final bool imageDetectStatus = imageDetectData['Status'];
 
-      if (_previousImageDetectStatus != null &&
-          _previousImageDetectStatus != imageDetectStatus &&
+      if (_previousImageDetectStatus != imageDetectStatus &&
           !imageDetectStatus) {
         _showNotification(
           title: 'Image Detect Disconnected',

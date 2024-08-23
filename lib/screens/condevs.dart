@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:securip/device_monitor.dart';
 
 class ConDevsPage extends StatefulWidget {
   const ConDevsPage({super.key});
@@ -11,15 +10,35 @@ class ConDevsPage extends StatefulWidget {
 }
 
 class _ConDevsPageState extends State<ConDevsPage> {
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      DeviceMonitorService().flutterLocalNotificationsPlugin;
-
-  // Access the global streams from DeviceMonitorService
   final Stream<DocumentSnapshot<Map<String, dynamic>>> _airQualityStream =
-      DeviceMonitorService().airQualityStream;
+      FirebaseFirestore.instance
+          .collection('Image-Stat')
+          .doc('Air-Quality')
+          .snapshots();
 
   final Stream<DocumentSnapshot<Map<String, dynamic>>> _imageDetectStream =
-      DeviceMonitorService().imageDetectStream;
+      FirebaseFirestore.instance
+          .collection('Image-Stat')
+          .doc('Image-Detect')
+          .snapshots();
+
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  bool? _previousAirQualityStatus;
+  bool? _previousImageDetectStatus;
+
+  @override
+  void initState() {
+    super.initState();
+
+    const initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +57,8 @@ class _ConDevsPageState extends State<ConDevsPage> {
                 return const Center(child: Text('Error: Something went wrong'));
               }
 
-              if (airQualitySnapshot.connectionState == ConnectionState.waiting) {
+              if (airQualitySnapshot.connectionState ==
+                  ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
 
@@ -47,15 +67,52 @@ class _ConDevsPageState extends State<ConDevsPage> {
               final airQualityName = airQualityData['Name'];
               final bool airQualityStatus = airQualityData['Status'];
 
-              return ListTile(
-                title: const Text('Air Quality'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Name: $airQualityName'),
-                    Text(
-                        'Status: ${airQualityStatus ? 'Connected' : 'Disconnected'}'),
-                  ],
+              if (_previousAirQualityStatus != null &&
+                  _previousAirQualityStatus != airQualityStatus &&
+                  !airQualityStatus) {
+                showNotification(
+                    title: 'Air Quality Disconnected',
+                    body: 'The Air Quality device is no longer connected.');
+              }
+
+              _previousAirQualityStatus = airQualityStatus;
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Container(
+                  width: double.infinity,
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '$airQualityName',
+                            style: const TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10.0),
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Text(
+                              'Status: ${airQualityStatus ? 'Connected' : 'Disconnected'}',
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                color: airQualityStatus
+                                    ? Colors.green
+                                    : Colors
+                                        .red, // Green for connected, red for disconnected
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               );
             },
@@ -69,7 +126,8 @@ class _ConDevsPageState extends State<ConDevsPage> {
                 return const Center(child: Text('Error: Something went wrong'));
               }
 
-              if (imageDetectSnapshot.connectionState == ConnectionState.waiting) {
+              if (imageDetectSnapshot.connectionState ==
+                  ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
 
@@ -78,21 +136,84 @@ class _ConDevsPageState extends State<ConDevsPage> {
               final imageDetectName = imageDetectData['Name'];
               final bool imageDetectStatus = imageDetectData['Status'];
 
-              return ListTile(
-                title: const Text('Image Detect'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Name: $imageDetectName'),
-                    Text(
-                        'Status: ${imageDetectStatus ? 'Connected' : 'Disconnected'}'),
-                  ],
+              if (_previousImageDetectStatus != null &&
+                  _previousImageDetectStatus != imageDetectStatus &&
+                  !imageDetectStatus) {
+                showNotification(
+                    title: 'Image Detect Disconnected',
+                    body: 'The Image Detect device is no longer connected.');
+              }
+
+              _previousImageDetectStatus = imageDetectStatus;
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Container(
+                  width: double.infinity,
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '$imageDetectName',
+                            style: const TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10.0),
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Text(
+                              'Status: ${imageDetectStatus ? 'Connected' : 'Disconnected'}',
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                color: imageDetectStatus
+                                    ? Colors.green
+                                    : Colors
+                                        .red, // Green for connected, red for disconnected
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               );
             },
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> showNotification({
+    required String title,
+    required String body,
+  }) async {
+    print('Sending notification: $title - $body');
+
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'channel_id',
+      'Channel Name',
+      importance: Importance.max,
+      priority: Priority.high,
+      playSound: true,
+      icon: '@mipmap/ic_launcher',
+    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
     );
   }
 }
