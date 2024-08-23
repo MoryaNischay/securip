@@ -6,9 +6,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'screens/login.dart'; // Replace with your actual file name
 import 'screens/condevs.dart';
+import './device_monitor.dart'; // Import the DeviceMonitorService
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  DeviceMonitorService(); // Start monitoring devices
 
   runApp(MyApp());
 }
