@@ -43,8 +43,14 @@ class _ConDevsPageState extends State<ConDevsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 234, 183, 125),
       appBar: AppBar(
-        title: const Text('Connected Devices'),
+        backgroundColor: const Color.fromARGB(176, 227, 11, 94),
+        centerTitle: true,
+        title: const Text('Connected Devices',
+            style: TextStyle(
+              fontSize: 24.0,
+            )),
       ),
       body: Column(
         children: [
@@ -82,6 +88,7 @@ class _ConDevsPageState extends State<ConDevsPage> {
                 child: Container(
                   width: double.infinity,
                   child: Card(
+                    
                     child: Padding(
                       padding: const EdgeInsets.all(15.0),
                       child: Column(

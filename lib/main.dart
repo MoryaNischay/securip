@@ -21,6 +21,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Securip', // Replace with your app's name
       theme: ThemeData(
         primarySwatch: Colors.green,
